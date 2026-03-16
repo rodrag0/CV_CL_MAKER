@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Application Pack Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Hosted Wrapper</p>
+        <h1>Paste a job posting. Generate the pack.</h1>
+        <p class="lede">
+          This version is prepared for web hosting. It generates the files server-side
+          and gives you browser downloads instead of relying on local filesystem paths.
+        </p>
+      </section>
+
+      <section class="card">
+        {% if error %}
+        <div class="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="generator-form">
+          <label>
+            <span>Job posting</span>
+            <textarea name="job_posting" rows="18" placeholder="Paste the full posting here...">{{ values.job_posting }}</textarea>
+          </label>
+
+          <div class="grid">
+            <label>
+              <span>Tailoring mode</span>
+              <select name="tailoring_mode">
+                <option value="heuristic" {% if values.tailoring_mode == 'heuristic' %}selected{% endif %}>Fast local</option>
+                <option value="openai" {% if values.tailoring_mode == 'openai' %}selected{% endif %}>OpenAI tailored</option>
+              </select>
+            </label>
+
+            <label>
+              <span>OpenAI model</span>
+              <select name="openai_model">
+                <option value="gpt-5.4" {% if values.openai_model == 'gpt-5.4' %}selected{% endif %}>gpt-5.4</option>
+                <option value="gpt-5-mini" {% if values.openai_model == 'gpt-5-mini' %}selected{% endif %}>gpt-5-mini</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Company</span>
+              <input type="text" name="company" value="{{ values.company }}" placeholder="Optional override">
+            </label>
+
+            <label>
+              <span>Job title</span>
+              <input type="text" name="title" value="{{ values.title }}" placeholder="Optional override">
+            </label>
+
+            <label>
+              <span>Job ID</span>
+              <input type="text" name="job_id" value="{{ values.job_id }}" placeholder="Optional slug override">
+            </label>
+
+            <label>
+              <span>Language</span>
+              <select name="language">
+                <option value="auto" {% if values.language == 'auto' %}selected{% endif %}>Auto-detect</option>
+                <option value="en" {% if values.language == 'en' %}selected{% endif %}>English</option>
+                <option value="de" {% if values.language == 'de' %}selected{% endif %}>German</option>
+              </select>
+            </label>
+
+            <label class="api-field">
+              <span>OpenAI API key</span>
+              <input type="password" name="api_key" value="" placeholder="Optional if OPENAI_API_KEY is set">
+            </label>
+          </div>
+
+          <div class="toggles">
+            <label class="toggle">
+              <input type="checkbox" name="create_cover_letter" {% if values.create_cover_letter %}checked{% endif %}>
+              <span>Create cover letter</span>
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" name="include_founder" {% if values.include_founder %}checked{% endif %}>
+              <span>Include founder experience</span>
+            </label>
+          </div>
+
+          <button type="submit">Generate Application Pack</button>
+        </form>
+      </section>
+
+      {% if result %}
+      <section class="card result-card">
+        <div class="result-header">
+          <div>
+            <p class="eyebrow">Generated</p>
+            <h2>{{ result.role }}</h2>
+            <p class="meta">Company: {{ result.company }} | Language: {{ result.language }} | Focuses: {{ result.focuses }}</p>
+            <p class="meta">Mode: {{ result.tailoring_mode }} | Model: {{ result.ai_model }}</p>
+          </div>
+          <div class="job-id">{{ result.job_id }}</div>
+        </div>
+
+        <p class="meta">Pack ID: {{ result.pack_id }}</p>
+
+        <div class="downloads">
+          {% for item in result.downloads %}
+          <a class="download-card" href="{{ item.url }}">
+            <strong>{{ item.label }}</strong>
+            <span>{{ item.path }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,3 @@
+Digital Space Manager NXTSpace
+Die Wissensstadt Heilbronn gGmbH
+Linux, Python, AI, LLMs, IoT, Raspberry Pi, ESP32, student support.

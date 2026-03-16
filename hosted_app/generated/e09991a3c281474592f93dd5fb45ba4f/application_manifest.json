@@ -1,0 +1,23 @@
+{
+  "pack_id": "e09991a3c281474592f93dd5fb45ba4f",
+  "job_id": "die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace",
+  "company": "Die Wissensstadt Heilbronn gGmbH",
+  "role": "Digital Space Manager NXTSpace",
+  "language": "de",
+  "tailoring_mode": "heuristic",
+  "ai_model": null,
+  "focuses": [
+    "software",
+    "embedded",
+    "ops"
+  ],
+  "generated_files": {
+    "ats_docx": "CV\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_CV_ATS_Styled.docx",
+    "designed_docx": "CV\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_CV_Designed.docx",
+    "letter_docx": "Cover Letters\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_Cover_Letter_Styled.docx",
+    "ats_pdf": "CV\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_CV_ATS_Styled.pdf",
+    "designed_pdf": "CV\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_CV_Designed.pdf",
+    "letter_pdf": "Cover Letters\\die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace\\files\\Rodrigo_Ponce_Cortes_Cover_Letter_Styled.pdf",
+    "bundle_zip": "die_wissensstadt_heilbronn_ggmbh_digital_space_manager_nxtspace_application_pack.zip"
+  }
+}

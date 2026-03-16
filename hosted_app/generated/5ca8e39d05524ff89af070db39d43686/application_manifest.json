@@ -1,0 +1,23 @@
+{
+  "pack_id": "5ca8e39d05524ff89af070db39d43686",
+  "job_id": "cisco_are_you_our_new_graduate_software_engineer",
+  "company": "Cisco",
+  "role": "Are You Our New Graduate Software Engineer?",
+  "language": "en",
+  "tailoring_mode": "openai",
+  "ai_model": "gpt-5.4",
+  "focuses": [
+    "software",
+    "sales",
+    "product"
+  ],
+  "generated_files": {
+    "ats_docx": "CV\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_CV_ATS_Styled.docx",
+    "designed_docx": "CV\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_CV_Designed.docx",
+    "letter_docx": "Cover Letters\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_Cover_Letter_Styled.docx",
+    "ats_pdf": "CV\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_CV_ATS_Styled.pdf",
+    "designed_pdf": "CV\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_CV_Designed.pdf",
+    "letter_pdf": "Cover Letters\\cisco_are_you_our_new_graduate_software_engineer\\files\\Rodrigo_Ponce_Cortes_Cover_Letter_Styled.pdf",
+    "bundle_zip": "cisco_are_you_our_new_graduate_software_engineer_application_pack.zip"
+  }
+}
