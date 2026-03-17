@@ -16,7 +16,6 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
-from app.profile import PROFILE
 from app.tailor import TailoredApplication
 
 
@@ -139,7 +138,7 @@ def write_ats_cv(application: TailoredApplication, output_docx: Path) -> None:
 
     header = doc.add_paragraph()
     header.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ptext(header, PROFILE.name, bold=True, size=23, color=ACCENT)
+    ptext(header, application.profile.name, bold=True, size=23, color=ACCENT)
 
     role = doc.add_paragraph()
     role.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -216,21 +215,23 @@ def write_designed_cv(application: TailoredApplication, output_docx: Path) -> No
     right.width = Inches(4.95)
     set_cell_shading(left, "F3F6F8")
 
+    profile = application.profile
+
     name = left.add_paragraph()
     name.paragraph_format.space_after = Pt(2)
-    ptext(name, PROFILE.name, bold=True, size=17, color=ACCENT)
+    ptext(name, profile.name, bold=True, size=17, color=ACCENT)
 
     role = left.add_paragraph()
-    ptext(role, PROFILE.headline.replace(" | ", "\n"), bold=True, size=10, color=DARK)
+    ptext(role, profile.headline.replace(" | ", "\n"), bold=True, size=10, color=DARK)
 
     designed_heading(left, "Contact")
-    for line in [PROFILE.city, PROFILE.address, PROFILE.phone, PROFILE.email]:
+    for line in [profile.city, profile.address, profile.phone, profile.email]:
         paragraph = left.add_paragraph()
         paragraph.paragraph_format.space_after = Pt(1)
         ptext(paragraph, line, size=9.5, color=DARK)
 
     designed_heading(left, "Links")
-    for line in [PROFILE.github, PROFILE.linkedin]:
+    for line in [profile.github, profile.linkedin]:
         paragraph = left.add_paragraph()
         paragraph.paragraph_format.space_after = Pt(1)
         ptext(paragraph, line, size=9.5, color=ACCENT)
@@ -242,7 +243,7 @@ def write_designed_cv(application: TailoredApplication, output_docx: Path) -> No
         ptext(bullet, item, size=9.1, color=DARK)
 
     designed_heading(left, "Languages" if application.language == "en" else "Sprachen")
-    for line in PROFILE.languages:
+    for line in profile.languages:
         bullet = left.add_paragraph(style="List Bullet")
         bullet.paragraph_format.space_after = Pt(0)
         ptext(bullet, line, size=9.1, color=DARK)
@@ -302,11 +303,13 @@ def write_cover_letter(application: TailoredApplication, output_docx: Path) -> N
     doc = Document()
     set_page(doc)
 
+    profile = application.profile
+
     name = doc.add_paragraph()
-    ptext(name, PROFILE.name, bold=True, size=20, color=ACCENT)
+    ptext(name, profile.name, bold=True, size=20, color=ACCENT)
 
     sub = doc.add_paragraph()
-    ptext(sub, PROFILE.headline, size=10.5, color=MUTED)
+    ptext(sub, profile.headline, size=10.5, color=MUTED)
 
     contact = doc.add_paragraph()
     ptext(contact, application.contact_line, size=10, color=DARK)

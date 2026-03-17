@@ -22,11 +22,28 @@
         <div class="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="generator-form">
+        <form method="post" class="generator-form" data-generator-form>
           <label>
             <span>Job posting</span>
             <textarea name="job_posting" rows="18" placeholder="Paste the full posting here...">{{ values.job_posting }}</textarea>
           </label>
+
+          <details class="profile-override">
+            <summary>Candidate profile override (optional)</summary>
+            <p class="lede small">
+              Leave this empty to use Rodrigo as the default profile. If you want someone else
+              to use the app, paste a partial or full JSON profile override here.
+              <a href="/profile/default.json">Download the default profile JSON template</a>.
+            </p>
+            <label>
+              <span>Profile override JSON</span>
+              <textarea
+                name="profile_override"
+                rows="14"
+                placeholder='{"name":"Jane Doe","headline":"Software Engineer","email":"jane@example.com"}'
+              >{{ values.profile_override }}</textarea>
+            </label>
+          </details>
 
           <div class="grid">
             <label>
@@ -87,7 +104,20 @@
             </label>
           </div>
 
-          <button type="submit">Generate Application Pack</button>
+          <div class="progress-shell" data-progress-shell hidden aria-live="polite">
+            <div class="progress-meta">
+              <strong data-progress-label>Preparing request</strong>
+              <span data-progress-value>6%</span>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-bar" data-progress-bar></div>
+            </div>
+            <p class="progress-copy" data-progress-copy>
+              Packaging the profile context and job posting.
+            </p>
+          </div>
+
+          <button type="submit" data-submit-button>Generate Application Pack</button>
         </form>
       </section>
 
@@ -116,5 +146,63 @@
       </section>
       {% endif %}
     </main>
+    <script>
+      (() => {
+        const form = document.querySelector('[data-generator-form]');
+        if (!form) return;
+
+        const shell = form.querySelector('[data-progress-shell]');
+        const bar = form.querySelector('[data-progress-bar]');
+        const label = form.querySelector('[data-progress-label]');
+        const value = form.querySelector('[data-progress-value]');
+        const copy = form.querySelector('[data-progress-copy]');
+        const button = form.querySelector('[data-submit-button]');
+
+        let timer = null;
+        const stages = [
+          { cap: 18, label: 'Preparing request', copy: 'Packaging the profile context and job posting.' },
+          { cap: 42, label: 'Tailoring content', copy: 'Matching the role against the candidate profile.' },
+          { cap: 68, label: 'Building documents', copy: 'Composing the ATS CV, designed CV, and cover letter.' },
+          { cap: 90, label: 'Finalizing downloads', copy: 'Bundling files for browser download.' },
+        ];
+
+        function updateProgress(percent) {
+          let current = stages[stages.length - 1];
+          for (const stage of stages) {
+            if (percent <= stage.cap) {
+              current = stage;
+              break;
+            }
+          }
+          bar.style.width = `${percent}%`;
+          value.textContent = `${percent}%`;
+          label.textContent = current.label;
+          copy.textContent = current.copy;
+        }
+
+        form.addEventListener('submit', () => {
+          if (shell.hidden) {
+            shell.hidden = false;
+          }
+          button.disabled = true;
+          button.textContent = 'Generating...';
+
+          let percent = 6;
+          updateProgress(percent);
+          timer = window.setInterval(() => {
+            if (percent >= 90) return;
+            const remaining = percent < 42 ? 5 : percent < 68 ? 3 : 2;
+            percent = Math.min(90, percent + remaining);
+            updateProgress(percent);
+          }, 480);
+        });
+
+        window.addEventListener('pageshow', () => {
+          if (timer) {
+            window.clearInterval(timer);
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -8,7 +8,7 @@ from dataclasses import asdict
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-from app.profile import PROFILE
+from app.profile import CandidateProfile, PROFILE
 from app.tailor import (
     GeneratedExperience,
     TailoredApplication,
@@ -46,7 +46,7 @@ class AIApplicationPack(BaseModel):
     cover_letter_body: list[str] = Field(min_length=5, max_length=7)
 
 
-SYSTEM_PROMPT = """You tailor truthful CVs and cover letters for Rodrigo Ponce Cortes.
+SYSTEM_PROMPT = """You tailor truthful CVs and cover letters for the supplied candidate profile.
 
 Rules:
 - Ground every statement strictly in the supplied candidate profile and the pasted job posting.
@@ -70,6 +70,7 @@ def resolve_api_key(provided_key: str) -> str:
 
 def build_user_prompt(
     *,
+    profile: CandidateProfile,
     job_posting: str,
     language: str,
     include_founder: bool,
@@ -104,7 +105,7 @@ Output requirements:
 - `cover_letter_body`: 5 to 7 paragraphs including greeting and signoff.
 
 Candidate profile JSON:
-{json.dumps(asdict(PROFILE), ensure_ascii=False, indent=2)}
+{json.dumps(asdict(profile), ensure_ascii=False, indent=2)}
 
 Job posting:
 {job_posting}
@@ -121,6 +122,7 @@ def tailor_application_with_openai(
     requested_title: str = "",
     requested_language: str = "auto",
     include_founder: bool = True,
+    profile: CandidateProfile = PROFILE,
 ) -> TailoredApplication:
     language = infer_language(job_posting, requested_language)
     heuristic_company = extract_company(job_posting, requested_company)
@@ -136,6 +138,7 @@ def tailor_application_with_openai(
         store=False,
         text_format=AIApplicationPack,
         input=build_user_prompt(
+            profile=profile,
             job_posting=job_posting,
             language=language,
             include_founder=founder_enabled,
@@ -160,9 +163,10 @@ def tailor_application_with_openai(
     if not founder_enabled:
         founder_items = ()
     elif not founder_items:
-        founder_items = select_founder(PROFILE.founder_experience, focuses, True)
+        founder_items = select_founder(profile.founder_experience, focuses, True)
 
     return TailoredApplication(
+        profile=profile,
         job_id=job_id,
         company=company,
         role=role,
@@ -184,8 +188,8 @@ def tailor_application_with_openai(
         education=tuple(item.strip() for item in parsed.education if item.strip()),
         projects=tuple(item.strip() for item in parsed.projects if item.strip()),
         founder_experience=tuple(item.strip() for item in founder_items if item.strip()),
-        contact_line=build_contact_line(PROFILE),
-        links_line=build_links_line(PROFILE),
+        contact_line=build_contact_line(profile),
+        links_line=build_links_line(profile),
         cover_letter_recipient=parsed.cover_letter_recipient.strip(),
         cover_letter_date=format_letter_date(language, date.today()),
         cover_letter_subject=parsed.cover_letter_subject.strip(),

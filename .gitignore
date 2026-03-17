@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+.env
+.DS_Store
+
+tmp_cover_skill.txt
+
+hosted_app/.env
+hosted_app/data/
+hosted_app/generated/
+hosted_app/__pycache__/
+
+CV/
+Cover Letters/

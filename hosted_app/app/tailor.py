@@ -181,6 +181,7 @@ class GeneratedExperience:
 
 @dataclass(frozen=True)
 class TailoredApplication:
+    profile: CandidateProfile
     job_id: str
     company: str
     role: str
@@ -621,6 +622,7 @@ def tailor_application(
     recipient, subject, body = build_cover_letter(role, company, focuses, language)
 
     return TailoredApplication(
+        profile=profile,
         job_id=job_id,
         company=company,
         role=role,

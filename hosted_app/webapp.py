@@ -7,6 +7,7 @@ from flask import Flask, abort, render_template, request, send_file
 
 from app.ai_tailor import tailor_application_with_openai
 from app.generator import GENERATED_ROOT, cleanup_old_packs, generate_application_pack
+from app.profile import default_profile_json, profile_from_override
 from app.tailor import tailor_application
 
 
@@ -24,6 +25,7 @@ def form_defaults() -> dict[str, str]:
         "tailoring_mode": "heuristic",
         "openai_model": "gpt-5.4",
         "api_key": "",
+        "profile_override": "",
         "create_cover_letter": "on",
         "include_founder": "on",
     }
@@ -104,6 +106,7 @@ def index():
             error = "Paste a job posting before generating an application pack."
         else:
             try:
+                profile = profile_from_override(values["profile_override"])
                 if values["tailoring_mode"] == "openai":
                     application = tailor_application_with_openai(
                         values["job_posting"],
@@ -114,6 +117,7 @@ def index():
                         requested_title=values["title"],
                         requested_language=values["language"],
                         include_founder=bool(values["include_founder"]),
+                        profile=profile,
                     )
                 else:
                     application = tailor_application(
@@ -123,6 +127,7 @@ def index():
                         requested_title=values["title"],
                         requested_language=values["language"],
                         include_founder=bool(values["include_founder"]),
+                        profile=profile,
                     )
 
                 pack_id = uuid.uuid4().hex
@@ -148,6 +153,15 @@ def index():
         values["api_key"] = ""
 
     return render_template("index.html", values=values, result=result, error=error)
+
+
+@app.get("/profile/default.json")
+def default_profile():
+    cleanup_old_packs()
+    path = GENERATED_ROOT / "rodrigo_default_profile.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(default_profile_json(), encoding="utf-8")
+    return send_file(path, as_attachment=True, download_name="default_profile.json")
 
 
 @app.get("/download/<pack_id>/<path:relative_path>")

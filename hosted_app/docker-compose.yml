@@ -1,0 +1,19 @@
+services:
+  jobsearch-app:
+    build:
+      context: .
+    container_name: jobsearch-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_GENERATED_DIR: /data/generated
+    volumes:
+      - ./data:/data
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    external: true
+    name: padelkarte_default

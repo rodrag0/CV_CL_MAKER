@@ -76,6 +76,35 @@ p {
   font-size: 1rem;
 }
 
+.lede.small {
+  max-width: none;
+  margin: 0 0 14px;
+  font-size: 0.94rem;
+}
+
+.profile-override {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.profile-override summary {
+  cursor: pointer;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.profile-override[open] summary {
+  margin-bottom: 12px;
+}
+
+.profile-override a {
+  color: var(--accent);
+}
+
 .card {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -161,6 +190,67 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.82;
+}
+
+.progress-shell {
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(219, 229, 218, 0.5), rgba(255, 255, 255, 0.9));
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+}
+
+.progress-track {
+  position: relative;
+  overflow: hidden;
+  height: 12px;
+  margin: 10px 0 10px;
+  border-radius: 999px;
+  background: rgba(46, 78, 62, 0.12);
+}
+
+.progress-bar {
+  position: relative;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #355743 0%, #547b63 45%, #87a98f 100%);
+  box-shadow: 0 8px 22px rgba(53, 87, 67, 0.24);
+  transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -35%;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 48%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: progress-glint 1.4s linear infinite;
+}
+
+.progress-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
 .result-header {
   display: flex;
   justify-content: space-between;
@@ -222,5 +312,15 @@ code {
 
   .result-header {
     gap: 12px;
+  }
+}
+
+@keyframes progress-glint {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(360%);
   }
 }
