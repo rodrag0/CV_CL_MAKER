@@ -164,6 +164,22 @@ PROFILE = CandidateProfile(
     ),
 )
 
+EMPTY_PROFILE = CandidateProfile(
+    name="",
+    headline="",
+    city="",
+    address="",
+    phone="",
+    email="",
+    github="",
+    linkedin="",
+    languages=(),
+    education=(),
+    experiences=(),
+    projects=(),
+    founder_experience=(),
+)
+
 
 def _coerce_tagged_items(values, default_tags: tuple[str, ...] = ()) -> tuple[TaggedText, ...]:
     items: list[TaggedText] = []
@@ -209,19 +225,11 @@ def default_profile_json() -> str:
     return json.dumps(profile_to_dict(PROFILE), ensure_ascii=False, indent=2)
 
 
-def profile_from_override(override_text: str, base: CandidateProfile = PROFILE) -> CandidateProfile:
-    raw = override_text.strip()
-    if not raw:
-        return base
+def blank_profile() -> CandidateProfile:
+    return EMPTY_PROFILE
 
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise ValueError("Profile override must be valid JSON.") from exc
 
-    if not isinstance(payload, dict):
-        raise ValueError("Profile override JSON must be an object.")
-
+def candidate_profile_from_payload(payload: dict, base: CandidateProfile = PROFILE) -> CandidateProfile:
     simple_fields = {
         "name": payload.get("name", base.name),
         "headline": payload.get("headline", base.headline),
@@ -254,3 +262,19 @@ def profile_from_override(override_text: str, base: CandidateProfile = PROFILE) 
         projects=projects,
         founder_experience=founder_experience,
     )
+
+
+def profile_from_override(override_text: str, base: CandidateProfile = PROFILE) -> CandidateProfile:
+    raw = override_text.strip()
+    if not raw:
+        return base
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError("Profile override must be valid JSON.") from exc
+
+    if not isinstance(payload, dict):
+        raise ValueError("Profile override JSON must be an object.")
+
+    return candidate_profile_from_payload(payload, base=base)

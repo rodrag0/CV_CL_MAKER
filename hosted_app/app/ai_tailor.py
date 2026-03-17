@@ -8,7 +8,7 @@ from dataclasses import asdict
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-from app.profile import CandidateProfile, PROFILE
+from app.profile import CandidateProfile, PROFILE, blank_profile, candidate_profile_from_payload
 from app.tailor import (
     GeneratedExperience,
     TailoredApplication,
@@ -46,6 +46,34 @@ class AIApplicationPack(BaseModel):
     cover_letter_body: list[str] = Field(min_length=5, max_length=7)
 
 
+class AIProfileTaggedText(BaseModel):
+    text: str
+    tags: list[str] = Field(default_factory=list, max_length=5)
+
+
+class AIProfileExperience(BaseModel):
+    company: str
+    title: str
+    date: str
+    bullets: list[AIProfileTaggedText] = Field(default_factory=list, max_length=6)
+
+
+class AIExtractedCandidateProfile(BaseModel):
+    name: str = ""
+    headline: str = ""
+    city: str = ""
+    address: str = ""
+    phone: str = ""
+    email: str = ""
+    github: str = ""
+    linkedin: str = ""
+    languages: list[str] = Field(default_factory=list, max_length=8)
+    education: list[str] = Field(default_factory=list, max_length=8)
+    experiences: list[AIProfileExperience] = Field(default_factory=list, max_length=8)
+    projects: list[AIProfileTaggedText] = Field(default_factory=list, max_length=8)
+    founder_experience: list[AIProfileTaggedText] = Field(default_factory=list, max_length=6)
+
+
 SYSTEM_PROMPT = """You tailor truthful CVs and cover letters for the supplied candidate profile.
 
 Rules:
@@ -61,11 +89,49 @@ Rules:
 """
 
 
+PROFILE_EXTRACTION_PROMPT = """You extract a truthful structured candidate profile from resume text.
+
+Rules:
+- Use only facts present in the supplied text.
+- Do not invent employers, dates, degrees, contact details, tools, links, languages, projects, or founder history.
+- Keep bullets concise and factual.
+- If a field is missing, leave it empty.
+- Return only structured data matching the schema.
+- For `tags`, use only short lowercase labels that help tailoring, such as software, embedded, ai, sales, ops, product, web, startup, automation, systems, simulation, quality, business.
+"""
+
+
 def resolve_api_key(provided_key: str) -> str:
     api_key = provided_key.strip() or os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise ValueError("OpenAI mode requires an API key. Provide one in the form or set OPENAI_API_KEY.")
     return api_key
+
+
+def extract_candidate_profile_from_text(
+    source_text: str,
+    *,
+    api_key: str,
+    model: str,
+) -> CandidateProfile:
+    cleaned = source_text.strip()
+    if not cleaned:
+        raise ValueError("The uploaded profile source is empty.")
+
+    client = OpenAI(api_key=resolve_api_key(api_key))
+    response = client.responses.parse(
+        model=model,
+        reasoning={"effort": "medium"},
+        max_output_tokens=4000,
+        store=False,
+        text_format=AIExtractedCandidateProfile,
+        input=f"Extract a structured candidate profile from the text below.\n\nCandidate source text:\n{cleaned}",
+        instructions=PROFILE_EXTRACTION_PROMPT,
+    )
+    parsed = response.output_parsed
+    if parsed is None:
+        raise RuntimeError("OpenAI did not return a structured candidate profile.")
+    return candidate_profile_from_payload(parsed.model_dump(), base=blank_profile())
 
 
 def build_user_prompt(

@@ -595,11 +595,17 @@ def build_cover_letter(
 
 
 def build_contact_line(profile: CandidateProfile) -> str:
-    return f"{profile.city} | {profile.address} | {profile.phone} | {profile.email}"
+    parts = [profile.city, profile.address, profile.phone, profile.email]
+    return " | ".join(part for part in parts if part)
 
 
 def build_links_line(profile: CandidateProfile) -> str:
-    return f"GitHub: https://{profile.github} | LinkedIn: https://{profile.linkedin}"
+    links: list[str] = []
+    if profile.github:
+        links.append(f"GitHub: https://{profile.github}")
+    if profile.linkedin:
+        links.append(f"LinkedIn: https://{profile.linkedin}")
+    return " | ".join(links)
 
 
 def tailor_application(

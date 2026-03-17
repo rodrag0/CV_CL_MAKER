@@ -3,16 +3,17 @@ from __future__ import annotations
 import uuid
 from pathlib import Path
 
+from pypdf import PdfReader
 from flask import Flask, abort, render_template, request, send_file
 
-from app.ai_tailor import tailor_application_with_openai
+from app.ai_tailor import extract_candidate_profile_from_text, tailor_application_with_openai
 from app.generator import GENERATED_ROOT, cleanup_old_packs, generate_application_pack
-from app.profile import default_profile_json, profile_from_override
+from app.profile import PROFILE, default_profile_json, profile_from_override
 from app.tailor import tailor_application
 
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
 
 def form_defaults() -> dict[str, str]:
@@ -90,6 +91,52 @@ def safe_generated_path(pack_id: str, relative_path: str) -> Path:
     return target
 
 
+def extract_text_from_pdf(upload) -> str:
+    reader = PdfReader(upload.stream)
+    pages = [(page.extract_text() or "").strip() for page in reader.pages]
+    text = "\n\n".join(page for page in pages if page)
+    if not text.strip():
+        raise ValueError("Could not extract text from the uploaded PDF.")
+    return text
+
+
+def resolve_profile_override(values: dict[str, str]):
+    raw_text = values["profile_override"].strip()
+    uploaded_pdf = request.files.get("profile_override_pdf")
+    has_pdf = bool(uploaded_pdf and uploaded_pdf.filename)
+
+    if raw_text and has_pdf:
+        raise ValueError("Use either profile text/JSON or a PDF upload, not both.")
+
+    if has_pdf:
+        filename = uploaded_pdf.filename.lower()
+        if not filename.endswith(".pdf"):
+            raise ValueError("Profile upload must be a PDF file.")
+        if values["tailoring_mode"] != "openai":
+            raise ValueError("PDF profile overrides require OpenAI tailored mode.")
+        profile_text = extract_text_from_pdf(uploaded_pdf)
+        return extract_candidate_profile_from_text(
+            profile_text,
+            api_key=request.form.get("api_key", ""),
+            model=values["openai_model"],
+        )
+
+    if not raw_text:
+        return PROFILE
+
+    if raw_text.lstrip().startswith("{"):
+        return profile_from_override(raw_text)
+
+    if values["tailoring_mode"] != "openai":
+        raise ValueError("Raw text profile overrides require OpenAI tailored mode. Use JSON for Fast local mode.")
+
+    return extract_candidate_profile_from_text(
+        raw_text,
+        api_key=request.form.get("api_key", ""),
+        model=values["openai_model"],
+    )
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     cleanup_old_packs()
@@ -106,7 +153,7 @@ def index():
             error = "Paste a job posting before generating an application pack."
         else:
             try:
-                profile = profile_from_override(values["profile_override"])
+                profile = resolve_profile_override(values)
                 if values["tailoring_mode"] == "openai":
                     application = tailor_application_with_openai(
                         values["job_posting"],

@@ -22,7 +22,7 @@
         <div class="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" class="generator-form" data-generator-form>
+        <form method="post" enctype="multipart/form-data" class="generator-form" data-generator-form>
           <label>
             <span>Job posting</span>
             <textarea name="job_posting" rows="18" placeholder="Paste the full posting here...">{{ values.job_posting }}</textarea>
@@ -32,17 +32,26 @@
             <summary>Candidate profile override (optional)</summary>
             <p class="lede small">
               Leave this empty to use Rodrigo as the default profile. If you want someone else
-              to use the app, paste a partial or full JSON profile override here.
+              to use the app, provide one of these:
+              JSON override, raw profile/resume text, or a PDF resume.
               <a href="/profile/default.json">Download the default profile JSON template</a>.
             </p>
             <label>
-              <span>Profile override JSON</span>
+              <span>Profile override text or JSON</span>
               <textarea
                 name="profile_override"
                 rows="14"
-                placeholder='{"name":"Jane Doe","headline":"Software Engineer","email":"jane@example.com"}'
+                placeholder='JSON example: {"name":"Jane Doe","headline":"Software Engineer","email":"jane@example.com"}&#10;&#10;Or paste raw resume/profile text here for OpenAI mode.'
               >{{ values.profile_override }}</textarea>
             </label>
+            <label>
+              <span>Profile override PDF</span>
+              <input type="file" name="profile_override_pdf" accept="application/pdf,.pdf">
+            </label>
+            <p class="lede small">
+              JSON works in both modes. Raw text and PDF overrides require <strong>OpenAI tailored</strong>
+              mode because the app first converts them into a structured profile.
+            </p>
           </details>
 
           <div class="grid">

@@ -7,6 +7,8 @@ This deployment flow matches the current VPS setup:
 - Dockerized Caddy in the separate `padelkarte` stack
 - shared Docker network `padelkarte_default`
 - Caddy upstream `jobsearch-app:5000`
+- public app URL `https://cv.padelkarte.com`
+- Basic Auth enabled in Caddy
 
 ## First-time VPS setup
 
@@ -25,6 +27,18 @@ Start the app:
 
 ```bash
 sudo docker compose up -d --build
+```
+
+Make sure the Caddyfile in `/opt/padelkarte/Caddyfile` proxies to:
+
+```caddy
+reverse_proxy jobsearch-app:5000
+```
+
+Then reload Caddy:
+
+```bash
+sudo docker exec -it padelkarte-caddy-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 ```
 
 ## Normal deploy
@@ -87,3 +101,7 @@ Expected unauthenticated response:
 ```text
 HTTP/2 401
 ```
+
+After authenticating in the browser, the app should render normally. If the
+browser shows `502`, the most likely cause is that Caddy is still proxying to
+`127.0.0.1:5000` instead of `jobsearch-app:5000`.
